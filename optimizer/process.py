@@ -1,4 +1,8 @@
 import pandas as pd
+import pickle
+
+with open("clients.pkl", "rb") as f:
+    clients = pickle.load(f)
 
 def mask_client_probabilities(df: pd.DataFrame, clients: dict) -> dict:
     """
