@@ -9,7 +9,7 @@ def mask_client_probabilities(df: pd.DataFrame, clients: dict) -> dict:
         df (pd.DataFrame): Must contain 'idEmisora', 'Nombre', and 'TipoEnvio'.
         clients (dict): {
             'client_1': {
-                'probabilities': {idEmisora: probability, ...},
+                "full_probabilities": {idEmisora: probability, ...},
                 'bank': 'BANK_NAME'
             },
             ...
@@ -26,13 +26,13 @@ def mask_client_probabilities(df: pd.DataFrame, clients: dict) -> dict:
 
     for client_id, data in clients.items():
         client_bank = data["bank"]
-        prob_dict = data["probabilities"]
+        prob_dict = data["full_probabilities"]
 
         ids_from_bank = bank_to_ids.get(client_bank, set())
         ids_to_keep = ids_from_bank.union(interbancario_ids)
 
         # Keep only bank + interbancario ids
-        data["probabilities"] = {
+        data["full_probabilities"] = {
             em_id: prob if em_id in ids_to_keep else 0
             for em_id, prob in prob_dict.items()
         }
@@ -47,7 +47,7 @@ def append_hit_costs(df: pd.DataFrame, clients: dict) -> dict:
         df (pd.DataFrame): Must contain 'idEmisora', 'Costo_Hit_Miss', and 'Costo_Hit_Win'.
         clients (dict): {
             'client_1': {
-                'probabilities': {idEmisora: probability, ...},
+                "full_probabilities": {idEmisora: probability, ...},
                 'bank': 'BANK_NAME'
             },
             ...
@@ -61,7 +61,7 @@ def append_hit_costs(df: pd.DataFrame, clients: dict) -> dict:
     # Get keys with no 0 values
 
     for client_id, data in clients.items():
-        prob_dict = data["probabilities"]
+        prob_dict = data["full_probabilities"]
         # Get keys with no 0 values
         keys_with_values = [k for k, v in prob_dict.items() if v != 0]
         data["hit_costs"] = {
@@ -76,7 +76,7 @@ def append_hit_costs(df: pd.DataFrame, clients: dict) -> dict:
 
 def compute_profits_for_client(client_data):
     payment = client_data["payment"]
-    probabilities = client_data["probabilities"]
+    probabilities = client_data["full_probabilities"]
     hit_costs = client_data.get("hit_costs", {})
 
     profits = {}
@@ -98,7 +98,7 @@ def compute_profits_for_client(client_data):
 
 def compute_penalties_for_client(client_data):
     # payment = client_data["payment"]  # Still available in case needed later
-    probabilities = client_data["probabilities"]
+    probabilities = client_data["full_probabilities"]
     hit_costs = client_data.get("hit_costs", {})
 
     penalties = {}
@@ -132,7 +132,7 @@ def append_profits(clients):
     Parameters:
         clients (dict): {
             'client_1': {
-                'probabilities': {idEmisora: probability, ...},
+                "full_probabilities": {idEmisora: probability, ...},
                 'bank': 'BANK_NAME'
             },
             ...
@@ -154,7 +154,7 @@ def calculate_best_emisora(clients):
     Parameters:
         clients (dict): {
             'client_1': {
-                'probabilities': {idEmisora: probability, ...},
+                "full_probabilities": {idEmisora: probability, ...},
                 'bank': 'BANK_NAME'
             },
             ...
