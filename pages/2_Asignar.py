@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import pickle
+import plotly.express as px
 
 @st.cache_data
 def load_data_2025():
@@ -59,22 +60,64 @@ def extract_dfs(clients):
 if "data_loaded" not in st.session_state:
     st.session_state["data_loaded"] = False
 
-if st.button("Crear"):
+if st.button("Crear Asignación", use_container_width = True):
     with open("optimizer/clients.pkl", "rb") as f:
         credits = pickle.load(f)
 
     base_df, hit_costs_df, probabilities_df, profits_df = extract_dfs(credits)
-    st.session_state["base_df"] = base_df
+    emisora_df = load_emisora_cat()
+    st.session_state["probabilities_df"] = pd.merge(probabilities_df,emisora_df, left_on= "emisora",right_on="idEmisora").drop(["idEmisora", "emisora"], axis=1)
+    st.session_state["profits_df"] = profits_df
+    st.session_state["base_df"] = pd.merge(base_df,emisora_df, left_on= "best_emisora",right_on="idEmisora").drop(["idEmisora", "best_emisora"], axis=1)
     st.session_state["data_loaded"] = True
 
 # --- Show filters and data only if loaded ---
 if st.session_state["data_loaded"]:
     base_df = st.session_state["base_df"]
+    probabilities_df = st.session_state["probabilities_df"]
+    profits_df = st.session_state["profits_df"]
 
     bank = st.selectbox("Seleccione Banco", ["Todos"] + sorted(base_df["bank"].unique().tolist()))
+    emisora = st.selectbox("Seleccione Emisora", ["Todas"] + sorted(base_df["NombreEmisora"].unique().tolist()))
+    # Apply filters if a specific value is selected
+    filtered_df = base_df
     if bank != "Todos":
-        filtered_df = base_df[base_df['bank'] == bank]
-    else:
-        filtered_df = base_df
+        filtered_df = filtered_df[filtered_df['bank'] == bank]
+
+    if emisora != "Todas":
+        filtered_df = filtered_df[filtered_df['NombreEmisora'] == emisora]
+    
+    selected_emisoras = filtered_df['NombreEmisora'].unique()
+
+    # Filter probabilities_df where emisora is in selected_emisoras
+    filtered_probabilities_df = probabilities_df[probabilities_df['NombreEmisora'].isin(selected_emisoras)]
+
+
+
+
+    # Merge to bring in NombreEmisora (since probabilities_df only has 'emisora')
+    # Make sure 'emisora' <-> 'NombreEmisora' relation exists in filtered_df
+    # Now group by NombreEmisora and compute median probability
+    median_probs = (
+        filtered_probabilities_df
+        .groupby('NombreEmisora')['probability']
+        .median()
+        .reset_index()
+        .sort_values(by='probability', ascending=False)
+    )
+
+    # Plot using Plotly
+    fig = px.bar(
+        median_probs,
+        x='NombreEmisora',
+        y='probability',
+        title='Mediana de Probabilidad de Domiciliado Exitoso por Emisora',
+        labels={'NombreEmisora': 'Emisora', 'probability': 'Median Probability'},
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
     st.dataframe(filtered_df)
+    st.dataframe(filtered_probabilities_df)
+
+
