@@ -9,7 +9,5 @@ wheels/
 # Virtual environments
 .venv
 
-# Ipynb file
-*.ipynb
 
 /data/History
