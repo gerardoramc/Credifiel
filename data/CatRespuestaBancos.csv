@@ -1,0 +1,23 @@
+IdRespuestaBanco,Descripcion,Status
+00,Domiciliacion Exitosa,reintento
+01,Cuenta Inexistente,perdida
+02,Cuenta Bloqueada,perdida
+03,Cuenta Cancelada,perdida
+04,Cuenta Insuficiencia Fondos,reintento
+06,Cuenta no pertenece al Banco Cliente Usuario,perdida
+08,Orden de no pagara a ese Emisor,perdida
+10,Domiciliacion dada de  baja,perdida
+13,Otras causas,error
+18,Error en proceso de Domiciliacion,error
+19,Operacion Invalida,error
+26,Bajo Pago,reintento
+53,Cuenta cancelada,perdida
+88,Bloqueo a todos los cargos,perdida
+DD00021,Cuenta Inexistente,perdida
+DD00028,Importe mayor al autorizado por el cliente,error
+DD00031,Cuenta con Insuficiencia de Fondos,reintento
+DD00033,Domiciliacion dada de baja,perdida
+INC16,Cuenta Bloqueada,perdida
+INC9,Cuenta Cancelada,perdida
+DD00041,TRANSACCÓN RECHAZADA (OGE0076),error
+DD00042,TRANSACCIÓN RECHAZADA (OGE0039),error
